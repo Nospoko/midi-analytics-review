@@ -1,5 +1,13 @@
 # Midi Analytics Review
 
+Install dependencies:
+
+```sh
+pip install -r requirements.txt
+```
+
+Run the dashboard:
+
 ```sh
 streamlit run dashboard_pianoroll.py
 ```
