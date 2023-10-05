@@ -1,3 +1,9 @@
+# Midi Analytics Review
+
+```sh
+streamlit run dashboard_pianoroll.py
+```
+
 ### Code Style
 
 This repository uses pre-commit hooks with forced python formatting ([black](https://github.com/psf/black),
