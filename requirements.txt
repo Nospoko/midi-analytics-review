@@ -1,3 +1,5 @@
 fortepyan==0.2.4
 matplotlib==3.8.0
+midi2audio~=0.1.1
+pandas~=1.5.3
 streamlit==1.27.2

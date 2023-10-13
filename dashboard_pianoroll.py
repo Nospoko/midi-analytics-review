@@ -1,8 +1,33 @@
+import os
+
 import pandas as pd
 import fortepyan as ff
 import streamlit as st
 from fortepyan import MidiFile, MidiPiece
+from fortepyan.audio import render as render_audio
 from fortepyan.analytics.clustering import process as clustering_process
+
+
+def generated_piece_av(piece: MidiPiece, save_base: str) -> dict:
+    mp3_path = save_base + ".mp3"
+
+    if not os.path.exists(mp3_path):
+        render_audio.midi_to_mp3(piece.to_midi(), mp3_path)
+
+    pianoroll_path = save_base + "-pr.png"
+
+    midi_path = save_base + ".mid"
+    input_path = save_base + "-input.mid"
+    output_path = save_base + "-output.mid"
+
+    paths = {
+        "mp3": mp3_path,
+        "midi": midi_path,
+        "pianoroll": pianoroll_path,
+        "input_midi": input_path,
+        "output_midi": output_path,
+    }
+    return paths
 
 
 def main():
@@ -10,9 +35,15 @@ def main():
 
     if uploaded_file is not None:
         piece = MidiFile(uploaded_file).piece
+        st.markdown("### Showing a pianoroll of the uploaded MIDI file")
+        fig = ff.view.draw_pianoroll_with_velocities(piece)
+        st.pyplot(fig, clear_figure=True)
 
-        # TODO Document what the *n* parameter is doing
-        n_clustering = st.number_input(label="n parameter", value=16)
+        generated_piece_av(piece, "uploaded_file")
+        st.audio("uploaded_file.mp3")
+
+        n_clustering = st.number_input(label="N parameter:", value=16)
+        st.markdown("The N parameter specifies how many consecutive pitch values are used to distinguish identical fragments")
         df = clustering_process.run(piece, n=n_clustering)
         fragments = prepare_fragments(df=df, piece=piece, n=n_clustering)
 
@@ -35,8 +66,11 @@ def main():
             st.markdown("Showing a pianoroll for one of the variants")
             st.markdown(f"This variant has {part_piece.size} notes and {part_piece.duration:.2f} seconds")
 
-            fig = ff.view.draw_pianoroll_with_velocities(part_piece)
+            fig = ff.view.draw_pianoroll_with_velocities(variants)
             st.pyplot(fig, clear_figure=True)
+
+            generated_piece_av(part_piece, "part_piece")
+            st.audio("part_piece.mp3")
 
 
 def prepare_fragments(df: pd.DataFrame, piece: MidiPiece, n: int) -> list[dict]:
