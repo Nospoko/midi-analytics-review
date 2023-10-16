@@ -66,7 +66,7 @@ def main():
             st.markdown("Showing a pianoroll for one of the variants")
             st.markdown(f"This variant has {part_piece.size} notes and {part_piece.duration:.2f} seconds")
 
-            fig = ff.view.draw_pianoroll_with_velocities(variants)
+            fig = ff.view.draw_pianoroll_with_velocities(part_piece)
             st.pyplot(fig, clear_figure=True)
 
             generated_piece_av(part_piece, "part_piece")
