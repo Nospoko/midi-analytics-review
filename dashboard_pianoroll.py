@@ -74,10 +74,16 @@ def main():
 
 
 def prepare_fragments(df: pd.DataFrame, piece: MidiPiece, n: int) -> list[dict]:
-    # Unpack
+    # Filter fragments with most variants (top 5)
+    df = df.nlargest(5, "n_variants")
+
     fragments = []
+    max_fragments = 5
+    max_variants = 5
+
     for it, row in df.iterrows():
         variants = []
+
         for idx in row.idxs:
             start_idx = idx - row.left_shift
             start_idx = max(start_idx, 0)
@@ -94,8 +100,19 @@ def prepare_fragments(df: pd.DataFrame, piece: MidiPiece, n: int) -> list[dict]:
                 finish_note_index=int(finish_idx),
             )
             variants.append(variant)
-        fragment = dict(variants=variants)
-        fragments.append(fragment)
+
+            # Filter out fragments with long pauses
+            max_pause_duration = 2.0
+            if finish_time - start_time > max_pause_duration:
+                if len(variants) >= max_variants:
+                    break
+
+        if len(variants) > 0:
+            fragment = dict(variants=variants)
+            fragments.append(fragment)
+
+        if len(fragments) >= max_fragments:
+            break
 
     return fragments
 
